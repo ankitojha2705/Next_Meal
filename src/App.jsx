@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Layout from './components/layouts/Layout';
 import HomePage from './pages/Home';
 import SearchPage from './pages/Search';
-import RestaurantPage from './pages/Restaurants';
+import RestaurantDetailsPage from './pages/RestaurantDetails/RestaurantDetailsPage'; // Import the new page
 import LoginPage from './pages/Auth/Login';
 import SignupPage from './pages/Auth/SignUp';
 import ProfilePage from './pages/Profile';
@@ -15,7 +15,8 @@ const App = () => {
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="search" element={<SearchPage />} />
-        <Route path="restaurant/:id" element={<RestaurantPage />} />
+        {/* Change this route to RestaurantDetailsPage */}
+        <Route path="restaurant/:restaurantId" element={<RestaurantDetailsPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
         <Route path="profile" element={<ProfilePage />} />

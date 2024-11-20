@@ -1,15 +1,13 @@
-import React from 'react';
-import { Search, Star, Clock, Heart } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Search, Star, Heart } from "lucide-react";
+import { Link } from "react-router-dom";  // Import Link from react-router-dom
 
 const RestaurantCard = ({ restaurant }) => {
+  const { id, name, average_rating, price, review_count, categories, distance } = restaurant;
+
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
       <div className="relative">
-        <img
-          src={restaurant.image}
-          alt={restaurant.name}
-          className="w-full h-48 object-cover rounded-t-lg"
-        />
         <button className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100">
           <Heart className="h-5 w-5 text-gray-600" />
         </button>
@@ -17,24 +15,34 @@ const RestaurantCard = ({ restaurant }) => {
       
       <div className="p-4">
         <div className="flex justify-between">
-          <h3 className="text-lg font-semibold">{restaurant.name}</h3>
-          <span className="text-sm text-gray-600">{restaurant.price}</span>
+          <h3 className="text-lg font-semibold">{name}</h3>
+          <span className="text-sm text-gray-600">{price}</span>
         </div>
         
-        <div className="flex items-center mt-1">
+        <div className="flex items-center mb-4">
+          {/* Star Rating */}
           <div className="flex">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`h-4 w-4 ${i < Math.floor(restaurant.rating) ? 'text-red-500 fill-current' : 'text-gray-300'}`}
+                className={`h-6 w-6 ${i < Math.floor(average_rating) ? 'text-blue-500 fill-current' : 'text-gray-300'}`}
               />
             ))}
           </div>
-          <span className="ml-2 text-sm text-gray-600">({restaurant.reviewCount})</span>
+
+          {/* Average Rating (in numbers) and Review Count */}
+          <div className="ml-3 flex items-center">
+            <span className="text-lg font-semibold text-white">
+              {average_rating.toFixed(1)} / 5
+            </span>
+            <span className="ml-2 text-sm text-gray-300">
+              ({review_count} reviews)
+            </span>
+          </div>
         </div>
-        
+
         <div className="mt-2 text-sm text-gray-600">
-          {restaurant.cuisine} • {restaurant.distance}
+          {categories.join(", ")} • {distance}
         </div>
       </div>
     </div>
@@ -42,19 +50,26 @@ const RestaurantCard = ({ restaurant }) => {
 };
 
 const HomePage = () => {
-  const restaurants = [
-    {
-      id: 1,
-      name: "Giovanni's Italian",
-      rating: 4.8,
-      reviewCount: 847,
-      price: "$$$",
-      cuisine: "Italian",
-      image: "/api/placeholder/400/300?text=Italian+Restaurant",
-      distance: "0.8 miles"
-    },
-    // Add more restaurants...
-  ];
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    // Fetch restaurants data from Flask API
+    fetch("http://127.0.0.1:5001/restaurants")
+      .then(response => response.json())
+      .then(data => {
+        setRestaurants(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching restaurants:", error);
+        setLoading(false);
+      });
+  }, []);  // Empty dependency array means this runs once when the component mounts
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
@@ -96,7 +111,9 @@ const HomePage = () => {
         <h2 className="text-2xl font-bold mb-6">Popular Restaurants</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {restaurants.map(restaurant => (
-            <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+            <Link to={`/restaurant/${restaurant.id}`} key={restaurant.id}>
+              <RestaurantCard restaurant={restaurant} />
+            </Link>
           ))}
         </div>
       </div>
