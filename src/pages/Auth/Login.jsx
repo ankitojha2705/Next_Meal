@@ -1,18 +1,55 @@
-import React, { useEffect } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import keycloak from '../../keycloak'; // Import your Keycloak instance
 
 const LoginPage = () => {
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false
+    rememberMe: false,
   });
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
+  // Handle form input changes
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  // Handle custom form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      // Placeholder logic for handling custom login with backend
+      console.log('Custom form submission:', formData);
+      // You could send formData to your backend for validation and token generation
+      // const response = await api.post('/api/login', formData);
+      // const token = response.data.token;
+
+      // Save the token (if using custom backend)
+      // localStorage.setItem('token', token);
+
+      // For now, simulate a successful login:
+      setTimeout(() => {
+        window.location.href = '/home';
+      }, 1000);
+    } catch (err) {
+      setError('Invalid email or password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initialize Google Sign-In
   useEffect(() => {
     const loadGoogleScript = () => {
       const script = document.createElement('script');
@@ -23,118 +60,59 @@ const LoginPage = () => {
       document.body.appendChild(script);
     };
 
-    loadGoogleScript();
-
-    return () => {
-      const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-      if (script && script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    };
-  }, []);
-
-  const initializeGoogleSignIn = () => {
-    if (window.google) {
+    const initializeGoogleSignIn = () => {
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleSignIn
+        callback: handleGoogleSignIn,
       });
-  
       window.google.accounts.id.renderButton(
-        document.getElementById("googleSignInDiv"),
-        {
-          theme: "outline",
-          size: "large",
-          width: '364', // Match the width of your regular sign-in button
-          text: "continue_with",
-          shape: "rectangular",
-        }
+        document.getElementById('googleSignInDiv'),
+        { theme: 'outline', size: 'large' } // Customize as needed
       );
-    }
+    };
+
+    loadGoogleScript();
+  }, [GOOGLE_CLIENT_ID]);
+
+  // Handle Google Sign-In callback
+  const handleGoogleSignIn = (response) => {
+    console.log('Google Sign-In response:', response);
+    // Send the response.credential to your backend for verification
+    localStorage.setItem('token', response.credential); // Example of saving token
+    window.location.href = '/'; // Redirect after successful login
   };
 
-  const handleGoogleSignIn = async (response) => {
-    try {
-      setLoading(true);
-      setError('');
-  
-      const res = await fetch('http://localhost:3001/api/auth/google', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          credential: response.credential
-        })
+  // Handle Keycloak login
+  const handleKeycloakLogin = () => {
+    keycloak
+      .init({
+        onLoad: 'login-required',
+        checkLoginIframe: false,
+        checkLoginIframeInterval: 5, // Interval in seconds
+        checkLoginIframeTimeout: 60, // Timeout in seconds
+      })
+      .then((authenticated) => {
+        if (authenticated) {
+          console.log('Keycloak authenticated');
+          console.log('Token:', keycloak.token);
+          localStorage.setItem('token', keycloak.token); // Save token
+          window.location.href = '/'; // Redirect
+        } else {
+          setError('Keycloak authentication failed');
+        }
+      })
+      .catch((err) => {
+        console.error('Keycloak initialization failed', err);
+        setError('Keycloak authentication failed');
       });
-  
-      const data = await res.json();
-  
-      if (!res.ok) {
-        throw new Error(data.error || 'Google sign-in failed');
-      }
-  
-      // Store tokens and redirect
-      localStorage.setItem('token', data.tokens.accessToken);
-      localStorage.setItem('refreshToken', data.tokens.refreshToken);
-      window.location.href = '/dashboard';
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
   };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      setError('');
-
-      const response = await fetch('http://localhost:3001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
-
-      localStorage.setItem('token', data.tokens.accessToken);
-      localStorage.setItem('refreshToken', data.tokens.refreshToken);
-      window.location.href = '/dashboard';
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
-          <p className="mt-2 text-gray-600">
-            Sign in to your account
-          </p>
+          <p className="mt-2 text-gray-600">Sign in to your account</p>
         </div>
 
         {/* Error Message */}
@@ -169,7 +147,7 @@ const LoginPage = () => {
             </label>
             <div className="mt-1 relative">
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -182,11 +160,7 @@ const LoginPage = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
               >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
+                {showPassword ? 'Hide' : 'Show'}
               </button>
             </div>
           </div>
@@ -235,7 +209,17 @@ const LoginPage = () => {
         </div>
 
         {/* Google Sign-In Button */}
-        <div id="googleSignInDiv" className="mt-6">Google</div>
+        <div id="googleSignInDiv" className="mt-6"></div>
+
+        {/* Keycloak Login */}
+        <div className="mt-4">
+          <button
+            onClick={handleKeycloakLogin}
+            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Login with Keycloak
+          </button>
+        </div>
 
         {/* Sign Up Link */}
         <p className="mt-4 text-center text-sm text-gray-600">
