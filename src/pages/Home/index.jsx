@@ -1,31 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { Search, Star, Heart } from "lucide-react";
+import { Search, Star, Heart, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";  // Import Link from react-router-dom
 
 const RestaurantCard = ({ restaurant }) => {
-  const { id, name, average_rating, price, review_count, categories, distance } = restaurant;
+  const { business_id, name, average_rating, price, review_count, categories, distance, image } = restaurant;
+
+  // Calculate filled and empty stars based on average rating
+  const filledStars = Math.floor(average_rating);
+  const emptyStars = 5 - filledStars;
 
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
       <div className="relative">
+        <Link to={`/restaurant/${business_id}`} className="block">
+          {/* Show image if available, else placeholder */}
+          <img
+            src={image || "/api/placeholder/400/300?text=Restaurant+Image"}
+            alt={name}
+            className="w-full h-48 object-cover rounded-t-lg"
+          />
+        </Link>
         <button className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100">
           <Heart className="h-5 w-5 text-gray-600" />
         </button>
       </div>
-      
+
       <div className="p-4">
         <div className="flex justify-between">
           <h3 className="text-lg font-semibold">{name}</h3>
           <span className="text-sm text-gray-600">{price}</span>
         </div>
-        
+
         <div className="flex items-center mb-4">
           {/* Star Rating */}
           <div className="flex">
-            {[...Array(5)].map((_, i) => (
+            {/* Filled stars with blue color */}
+            {[...Array(filledStars)].map((_, i) => (
               <Star
                 key={i}
-                className={`h-6 w-6 ${i < Math.floor(average_rating) ? 'text-blue-500 fill-current' : 'text-gray-300'}`}
+                className="h-6 w-6 text-blue-500 fill-current"
+              />
+            ))}
+            {/* Empty stars in gray color */}
+            {[...Array(emptyStars)].map((_, i) => (
+              <Star
+                key={i + filledStars}
+                className="h-6 w-6 text-gray-300"
               />
             ))}
           </div>
@@ -52,20 +72,43 @@ const RestaurantCard = ({ restaurant }) => {
 const HomePage = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [filters, setFilters] = useState({
+    name: '',
+    city: '',
+    state: '',
+    min_rating: 0,
+    max_rating: 5,
+  });
+
+  const [showFilter, setShowFilter] = useState(false);
+
+  // Fetch restaurants data based on filters
   useEffect(() => {
-    // Fetch restaurants data from Flask API
-    fetch("http://127.0.0.1:5001/restaurants")
-      .then(response => response.json())
-      .then(data => {
+    const fetchData = async () => {
+      const queryParams = new URLSearchParams(filters).toString();
+      try {
+        const response = await fetch(`http://127.0.0.1:5001/restaurants?${queryParams}`);
+        const data = await response.json();
         setRestaurants(data);
         setLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error("Error fetching restaurants:", error);
         setLoading(false);
-      });
-  }, []);  // Empty dependency array means this runs once when the component mounts
+      }
+    };
+    
+    fetchData();
+  }, [filters]);  // Only re-run the effect when filters change
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const toggleFilter = () => setShowFilter(!showFilter);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -94,12 +137,85 @@ const HomePage = () => {
                       type="text"
                       placeholder="Search restaurants, cuisines..."
                       className="flex-1 ml-2 focus:outline-none"
+                      name="name"
+                      value={filters.name}
+                      onChange={handleFilterChange}
                     />
                   </div>
                 </div>
-                <button className="h-14 px-8 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                  Search
-                </button>
+
+                {/* Filter Button */}
+                <div className="relative">
+                  <button
+                    onClick={toggleFilter}
+                    className="h-14 px-8 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center space-x-2"
+                  >
+                    <span>Filters</span>
+                    <ChevronDown className={`h-5 w-5 transition-transform ${showFilter ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Filter Dropdown */}
+                  {showFilter && (
+                    <div className="absolute top-full right-0 bg-white shadow-lg rounded-lg mt-2 w-64 p-4">
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium">City</label>
+                          <input
+                            type="text"
+                            name="city"
+                            value={filters.city}
+                            onChange={handleFilterChange}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                            placeholder="Enter city"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium">State</label>
+                          <input
+                            type="text"
+                            name="state"
+                            value={filters.state}
+                            onChange={handleFilterChange}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                            placeholder="Enter state"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium">Min Rating</label>
+                          <select
+                            name="min_rating"
+                            value={filters.min_rating}
+                            onChange={handleFilterChange}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium">Max Rating</label>
+                          <select
+                            name="max_rating"
+                            value={filters.max_rating}
+                            onChange={handleFilterChange}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="5">5</option>
+                            <option value="4">4</option>
+                            <option value="3">3</option>
+                            <option value="2">2</option>
+                            <option value="1">1</option>
+                            <option value="0">0</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -111,7 +227,7 @@ const HomePage = () => {
         <h2 className="text-2xl font-bold mb-6">Popular Restaurants</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {restaurants.map(restaurant => (
-            <Link to={`/restaurant/${restaurant.id}`} key={restaurant.id}>
+            <Link to={`/restaurant/${restaurant.business_id}`} key={restaurant.business_id}>
               <RestaurantCard restaurant={restaurant} />
             </Link>
           ))}

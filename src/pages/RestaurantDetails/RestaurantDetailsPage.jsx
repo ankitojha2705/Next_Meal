@@ -3,13 +3,13 @@ import { useParams } from "react-router-dom";
 import { Star, MapPin, Clock } from "lucide-react";
 
 const RestaurantDetailsPage = () => {
-  const { restaurantId } = useParams();
+  const { business_id } = useParams();  // Capture the business_id from the URL
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch the restaurant details by ID
-    fetch(`http://127.0.0.1:5001/restaurants/${restaurantId}`)
+    // Fetch the restaurant details by business_id
+    fetch(`http://127.0.0.1:5001/restaurants/${business_id}`)
       .then(response => response.json())
       .then(data => {
         setRestaurant(data);
@@ -19,7 +19,7 @@ const RestaurantDetailsPage = () => {
         console.error("Error fetching restaurant:", error);
         setLoading(false);
       });
-  }, [restaurantId]);
+  }, [business_id]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -29,7 +29,11 @@ const RestaurantDetailsPage = () => {
     return <div>Restaurant not found.</div>;
   }
 
-  const { name, average_rating, review_count, address, city, state, categories, hours, price } = restaurant;
+  const { name, average_rating, review_count, address, city, state, categories, hours, price, image } = restaurant;
+
+  // Number of filled stars based on average rating
+  const filledStars = Math.floor(average_rating);
+  const emptyStars = 5 - filledStars;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -40,10 +44,18 @@ const RestaurantDetailsPage = () => {
         <div className="flex justify-between mb-4">
           <div className="flex items-center">
             <div className="flex">
-              {[...Array(5)].map((_, i) => (
+              {/* Fill the stars with blue color for rating */}
+              {[...Array(filledStars)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-6 w-6 ${i < Math.floor(average_rating) ? 'text-blue-500 fill-current' : 'text-gray-300'}`}
+                  className="h-6 w-6 text-blue-500 fill-current"
+                />
+              ))}
+              {/* Add empty stars for the remaining part */}
+              {[...Array(emptyStars)].map((_, i) => (
+                <Star
+                  key={i + filledStars}
+                  className="h-6 w-6 text-gray-300"
                 />
               ))}
             </div>

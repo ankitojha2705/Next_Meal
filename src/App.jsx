@@ -15,8 +15,8 @@ const App = () => {
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="search" element={<SearchPage />} />
-        {/* Change this route to RestaurantDetailsPage */}
-        <Route path="restaurant/:restaurantId" element={<RestaurantDetailsPage />} />
+        {/* Update route path to use business_id instead of restaurantId */}
+        <Route path="restaurant/:business_id" element={<RestaurantDetailsPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
         <Route path="profile" element={<ProfilePage />} />
