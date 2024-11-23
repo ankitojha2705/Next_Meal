@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Search, User, MessageSquare } from 'lucide-react';
+import { Menu, MessageSquare, User } from 'lucide-react';
+import keycloak from '../../keycloak'; // Import Keycloak instance
 
 const Layout = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -12,10 +13,15 @@ const Layout = () => {
   };
 
   const navigationLinks = [
-    { name: 'Search', path: '/search' },
-    { name: 'Login', path: '/login' },
+    { name: 'Profile', path: '/profile', icon: User },
     { name: 'Chat', path: '/chat', icon: MessageSquare }
   ];
+
+  const handleSignout = () => {
+    keycloak.logout();
+    localStorage.removeItem('token'); // Remove token from local storage
+    navigate('/login'); // Redirect to login page
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -41,22 +47,18 @@ const Layout = () => {
                     isActivePath(link.path) ? 'text-red-600 font-medium' : ''
                   }`}
                 >
-                  {link.icon ? (
-                    <div className="flex items-center gap-1">
-                      <link.icon className="h-5 w-5" />
-                      <span>{link.name}</span>
-                    </div>
-                  ) : (
-                    link.name
-                  )}
+                  <div className="flex items-center gap-1">
+                    <link.icon className="h-5 w-5" />
+                    <span>{link.name}</span>
+                  </div>
                 </Link>
               ))}
-              <Link
-                to="/signup"
+              <button
+                onClick={handleSignout}
                 className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
               >
-                Sign Up
-              </Link>
+                Sign Out
+              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -81,23 +83,21 @@ const Layout = () => {
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    {link.icon ? (
-                      <div className="flex items-center gap-1">
-                        <link.icon className="h-5 w-5" />
-                        <span>{link.name}</span>
-                      </div>
-                    ) : (
-                      link.name
-                    )}
+                    <div className="flex items-center gap-1">
+                      <link.icon className="h-5 w-5" />
+                      <span>{link.name}</span>
+                    </div>
                   </Link>
                 ))}
-                <Link
-                  to="/signup"
+                <button
+                  onClick={() => {
+                    handleSignout();
+                    setIsMenuOpen(false);
+                  }}
                   className="text-red-600 font-medium hover:text-red-700"
-                  onClick={() => setIsMenuOpen(false)}
                 >
-                  Sign Up
-                </Link>
+                  Sign Out
+                </button>
               </div>
             </div>
           )}
