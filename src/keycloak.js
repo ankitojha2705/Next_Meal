@@ -1,25 +1,22 @@
 import Keycloak from 'keycloak-js';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+const VITE_APP_KEYCLOAK_URL = import.meta.env.VITE_APP_KEYCLOAK_URL;
 
 const keycloak = new Keycloak({
-  url: 'http://localhost:8080', // Your Keycloak server URL
+  url: VITE_APP_KEYCLOAK_URL, // Your Keycloak server URL
   realm: 'nextmeal',           // Your Keycloak realm name
   clientId: 'nextmeal-client', // Your Keycloak client ID
 });
 
-// keycloak.init({
-//   onLoad: "login-required",    // Login is required immediately
-//   checkLoginIframe: false,     // Disable iframe for token refresh (optional)
-//   redirectUri: "http://localhost:5173", // Replace with your app's URL
-//   flow: "standard",            // OAuth flow (default is standard)
-//   pkceMethod: "S256",          // Use PKCE for secure authentication
-// });
+// Initialize Keycloak
 
 keycloak
   .init({
     onLoad: 'login-required',
     scope: 'openid profile email',
     checkLoginIframe: false,
-    redirectUri: 'http://localhost:5173',
+    redirectUri: REDIRECT_URI,
   })
   .then((authenticated) => {
     if (authenticated) {
@@ -31,7 +28,7 @@ keycloak
       };
 
       // Send user data to your backend
-      fetch('http://localhost:3001/api/users', {
+      fetch(`${API_BASE_URL}/api/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
