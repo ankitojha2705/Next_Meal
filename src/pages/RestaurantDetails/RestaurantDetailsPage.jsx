@@ -9,6 +9,7 @@ const RestaurantDetailsPage = () => {
 
   useEffect(() => {
     // Fetch the restaurant details by business_id
+    console.log(business_id)
     fetch(`http://127.0.0.1:5001/restaurants/${business_id}`)
       .then(response => response.json())
       .then(data => {

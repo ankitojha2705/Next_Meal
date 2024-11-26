@@ -8,6 +8,7 @@ import LoginPage from './pages/Auth/Login';
 import ProfilePage from './pages/Profile';
 import ChatPage from './pages/Chat';
 import SignupPage from './pages/Auth/SignUp';
+import RestaurantDetailsPage from './pages/RestaurantDetails/RestaurantDetailsPage';
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="login" element={<LoginPage />} />
+        <Route path="restaurant/:business_id" element={<RestaurantDetailsPage />} />
         <Route
           path="profile"
           element={
