@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, Star, Heart, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";  // Import Link from react-router-dom
+const VITE_RESTAURANT_BASE_URL = import.meta.env.VITE_RESTAURANT_BASE_URL;
 
 const RestaurantCard = ({ restaurant }) => {
   const { business_id, name, average_rating, price, review_count, categories, distance, image } = restaurant;
@@ -87,7 +88,7 @@ const HomePage = () => {
     const fetchData = async () => {
       const queryParams = new URLSearchParams(filters).toString();
       try {
-        const response = await fetch(`http://127.0.0.1:5001/restaurants?${queryParams}`);
+        const response = await fetch(`${VITE_RESTAURANT_BASE_URL}/restaurants?${queryParams}`);
         const data = await response.json();
         setRestaurants(data);
         setLoading(false);

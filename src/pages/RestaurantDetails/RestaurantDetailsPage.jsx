@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Star, MapPin, Clock } from "lucide-react";
+const VITE_RESTAURANT_BASE_URL = import.meta.env.VITE_RESTAURANT_BASE_URL;
 
 const RestaurantDetailsPage = () => {
   const { business_id } = useParams();  // Capture the business_id from the URL
@@ -10,7 +11,7 @@ const RestaurantDetailsPage = () => {
   useEffect(() => {
     // Fetch the restaurant details by business_id
     console.log(business_id)
-    fetch(`http://127.0.0.1:5001/restaurants/${business_id}`)
+    fetch(`${VITE_RESTAURANT_BASE_URL}/restaurants/${business_id}`)
       .then(response => response.json())
       .then(data => {
         setRestaurant(data);
