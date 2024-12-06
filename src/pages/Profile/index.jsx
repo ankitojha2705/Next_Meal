@@ -4,6 +4,7 @@ import keycloak from '../../keycloak'; // Assuming this is your Keycloak instanc
 const Profile = () => {
   // Fetch user details directly from Keycloak
   const user = keycloak.tokenParsed;
+  // console.log('User:', user);
 
   // Logout function
   const handleLogout = () => {

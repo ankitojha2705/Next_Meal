@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Star, MapPin, Clock } from "lucide-react";
+import keycloak from '../../keycloak'; // Assuming this is your Keycloak instance
 
 const VITE_RESTAURANT_BASE_URL = import.meta.env.VITE_RESTAURANT_BASE_URL;
 const VITE_REVIEW_BASE_URL = import.meta.env.VITE_REVIEW_BASE_URL;
@@ -18,6 +19,7 @@ const RestaurantDetailsPage = () => {
     text: "",
   });
   const [editingReview, setEditingReview] = useState(null);
+  const user = keycloak.tokenParsed;
 
   // S3 base URL
   const S3_BASE_URL = `https://${S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/photos/`;
@@ -76,7 +78,7 @@ const RestaurantDetailsPage = () => {
       body: JSON.stringify({
         business_id,
         ...newReview,
-        user_id: "current_user_id", // Replace with actual user ID
+        user_id: user.sub,
         date: new Date().toISOString(),
       }),
     })
