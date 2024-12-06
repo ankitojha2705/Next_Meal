@@ -13,7 +13,6 @@ const RestaurantCard = ({ restaurant }) => {
 
   // Construct the image URL from S3
   const imageUrl = image ? `${S3_BASE_URL}${image}.jpg` : "/api/placeholder/400/300?text=Restaurant+Image";
-  console.log("Constructed Image URL:", imageUrl);
 
   // Calculate filled and empty stars
   const filledStars = Math.floor(average_rating);
