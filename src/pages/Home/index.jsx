@@ -2,11 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Search, Star, Heart, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";  // Import Link from react-router-dom
 const VITE_RESTAURANT_BASE_URL = import.meta.env.VITE_RESTAURANT_BASE_URL;
+const S3_BUCKET_NAME = import.meta.env.VITE_S3_BUCKET_NAME;
+const AWS_REGION = import.meta.env.VITE_AWS_REGION;
 
 const RestaurantCard = ({ restaurant }) => {
   const { business_id, name, average_rating, price, review_count, categories, distance, image } = restaurant;
 
-  // Calculate filled and empty stars based on average rating
+  // S3 base URL
+  const S3_BASE_URL = `https://${S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/photos/`;
+
+  // Construct the image URL from S3
+  const imageUrl = image ? `${S3_BASE_URL}${image}.jpg` : "/api/placeholder/400/300?text=Restaurant+Image";
+  console.log("Constructed Image URL:", imageUrl);
+
+  // Calculate filled and empty stars
   const filledStars = Math.floor(average_rating);
   const emptyStars = 5 - filledStars;
 
@@ -14,9 +23,8 @@ const RestaurantCard = ({ restaurant }) => {
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
       <div className="relative">
         <Link to={`/restaurant/${business_id}`} className="block">
-          {/* Show image if available, else placeholder */}
           <img
-            src={image || "/api/placeholder/400/300?text=Restaurant+Image"}
+            src={imageUrl}
             alt={name}
             className="w-full h-48 object-cover rounded-t-lg"
           />
@@ -33,25 +41,15 @@ const RestaurantCard = ({ restaurant }) => {
         </div>
 
         <div className="flex items-center mb-4">
-          {/* Star Rating */}
           <div className="flex">
-            {/* Filled stars with blue color */}
             {[...Array(filledStars)].map((_, i) => (
-              <Star
-                key={i}
-                className="h-6 w-6 text-blue-500 fill-current"
-              />
+              <Star key={i} className="h-6 w-6 text-blue-500 fill-current" />
             ))}
-            {/* Empty stars in gray color */}
             {[...Array(emptyStars)].map((_, i) => (
-              <Star
-                key={i + filledStars}
-                className="h-6 w-6 text-gray-300"
-              />
+              <Star key={i + filledStars} className="h-6 w-6 text-gray-300" />
             ))}
           </div>
 
-          {/* Average Rating (in numbers) and Review Count */}
           <div className="ml-3 flex items-center">
             <span className="text-lg font-semibold text-white">
               {average_rating.toFixed(1)} / 5
@@ -69,6 +67,7 @@ const RestaurantCard = ({ restaurant }) => {
     </div>
   );
 };
+
 
 const HomePage = () => {
   const [restaurants, setRestaurants] = useState([]);
