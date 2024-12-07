@@ -52,14 +52,19 @@ const RestaurantDetailsPage = () => {
         setLoading(false);
       });
 
-    fetch(`${VITE_REVIEW_BASE_URL}/reviews/business/${business_id}`)
+      fetch(`${VITE_REVIEW_BASE_URL}/reviews/business/${business_id}`)
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
           console.error("Error fetching reviews:", data.error);
           setReviews([]);
         } else {
-          setReviews(data);
+          // Pin user's review to the top
+          const userReview = data.find((review) => review.user_id === user.sub);
+          const otherReviews = data.filter((review) => review.user_id !== user.sub);
+          const sortedReviews = userReview ? [userReview, ...otherReviews] : otherReviews;
+  
+          setReviews(sortedReviews);
         }
         setReviewsLoading(false);
       })
@@ -68,7 +73,7 @@ const RestaurantDetailsPage = () => {
         setReviews([]);
         setReviewsLoading(false);
       });
-  }, [business_id]);
+  }, [business_id, user.sub]);
 
   // Handle form input for adding/updating reviews
   const handleInputChange = (e) => {
@@ -82,6 +87,11 @@ const RestaurantDetailsPage = () => {
       console.error("User is not authenticated or user ID is missing");
       return;
     }
+    const existingReview = reviews.find((review) => review.user_id === user.sub);
+    if (!editingReview && existingReview) {
+      alert("You can only add one review per restaurant.");
+      return;
+  }
 
     const url = editingReview
       ? `${VITE_REVIEW_BASE_URL}/reviews/${editingReview.review_id}`
@@ -110,14 +120,26 @@ const RestaurantDetailsPage = () => {
       })
       .then(() => {
         setEditingReview(null);
-        setNewReview({ stars: 0, text: "" });
-        fetch(`${VITE_REVIEW_BASE_URL}/reviews/business/${business_id}`)
-          .then((response) => response.json())
-          .then((data) => setReviews(data))
-          .catch((error) => console.error("Error refreshing reviews:", error));
-      })
-      .catch((error) => console.error("Error adding/updating review:", error));
-  };
+      setNewReview({ stars: 0, text: "" });
+      fetch(`${VITE_REVIEW_BASE_URL}/reviews/business/${business_id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            console.error("Error refreshing reviews:", data.error);
+            setReviews([]);
+          } else {
+            // Pin user's review to the top
+            const userReview = data.find((review) => review.user_id === user.sub);
+            const otherReviews = data.filter((review) => review.user_id !== user.sub);
+            const sortedReviews = userReview ? [userReview, ...otherReviews] : otherReviews;
+
+            setReviews(sortedReviews);
+          }
+        })
+        .catch((error) => console.error("Error refreshing reviews:", error));
+    })
+    .catch((error) => console.error("Error adding/updating review:", error));
+};
 
   // Delete a review
   const handleDeleteReview = (review_id) => {
