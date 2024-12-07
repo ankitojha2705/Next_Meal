@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Star, MapPin, Clock } from "lucide-react";
-import keycloak from '../../keycloak'; // Assuming this is your Keycloak instance
+import { Star, MapPin } from "lucide-react";
+import keycloak from "../../keycloak"; // Assuming this is your Keycloak instance
 
 const VITE_RESTAURANT_BASE_URL = import.meta.env.VITE_RESTAURANT_BASE_URL;
 const VITE_REVIEW_BASE_URL = import.meta.env.VITE_REVIEW_BASE_URL;
@@ -23,6 +23,16 @@ const RestaurantDetailsPage = () => {
 
   // S3 base URL
   const S3_BASE_URL = `https://${S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/photos/`;
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   // Fetch restaurant details and reviews
   useEffect(() => {
@@ -63,42 +73,46 @@ const RestaurantDetailsPage = () => {
 
   // Add or update a review
   const handleAddOrUpdateReview = () => {
+    if (!user || !user.sub) {
+      console.error("User is not authenticated or user ID is missing");
+      return;
+    }
+
     const url = editingReview
       ? `${VITE_REVIEW_BASE_URL}/reviews/${editingReview.review_id}`
       : `${VITE_REVIEW_BASE_URL}/reviews`;
+
     const method = editingReview ? "PUT" : "POST";
-  
+
     fetch(url, {
       method,
       headers: {
         "Content-Type": "application/json",
-        // Add an Authorization header if required
-        // Authorization: `Bearer ${authToken}`,
+        Authorization: `Bearer ${keycloak.token}`, // Use Keycloak token if available
       },
       body: JSON.stringify({
         business_id,
         ...newReview,
-        user_id: user.sub,
+        user_id: user.sub, // Keycloak user ID
         date: new Date().toISOString(),
       }),
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to update review");
+          throw new Error("Failed to add/update review");
         }
         return response.json();
       })
       .then(() => {
         setEditingReview(null);
         setNewReview({ stars: 0, text: "" });
-        // Refresh reviews
         fetch(`${VITE_REVIEW_BASE_URL}/reviews/business/${business_id}`)
           .then((response) => response.json())
-          .then((data) => setReviews(data));
+          .then((data) => setReviews(data))
+          .catch((error) => console.error("Error refreshing reviews:", error));
       })
       .catch((error) => console.error("Error adding/updating review:", error));
   };
-  
 
   // Delete a review
   const handleDeleteReview = (review_id) => {
@@ -115,22 +129,16 @@ const RestaurantDetailsPage = () => {
         return response.json();
       })
       .then(() => {
-        // Refresh reviews after deleting
         fetch(`${VITE_REVIEW_BASE_URL}/reviews/business/${business_id}`)
           .then((response) => response.json())
-          .then((data) => {
-            // Ensure reviews is always an array
-            setReviews(Array.isArray(data) ? data : []);
-          })
+          .then((data) => setReviews(Array.isArray(data) ? data : []))
           .catch((error) => {
             console.error("Error fetching reviews:", error);
-            setReviews([]); // Fallback to an empty array
+            setReviews([]);
           });
       })
       .catch((error) => console.error("Error deleting review:", error));
   };
-  
-  
 
   if (loading) {
     return <div>Loading...</div>;
@@ -140,7 +148,7 @@ const RestaurantDetailsPage = () => {
     return <div>Restaurant not found.</div>;
   }
 
-  const { name, description, average_rating, review_count, address, city, state, categories, hours, image } = restaurant;
+  const { name, description, average_rating, review_count, address, city, state, hours, image } = restaurant;
   const imageUrl = image ? `${S3_BASE_URL}${image}.jpg` : "/api/placeholder/400/300?text=Restaurant+Image";
 
   return (
@@ -195,6 +203,16 @@ const RestaurantDetailsPage = () => {
           <ul>
             {reviews.map((review, index) => (
               <li key={index} className="mb-4 border-b pb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center">
+                    <span className="text-gray-800 font-bold mr-2">
+                      {review.user_name || "Anonymous"}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      ({formatDate(review.date)})
+                    </span>
+                  </div>
+                </div>
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center">
                     {[...Array(Math.floor(review.stars))].map((_, i) => (
