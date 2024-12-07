@@ -24,6 +24,10 @@ const RestaurantDetailsPage = () => {
 
   
   const user = keycloak.tokenParsed;
+  //console.log(user, 'user');
+  console.log(user.sub, 'user.sub');
+  console.log(business_id,'business_id');
+
   
 
   // S3 base URL

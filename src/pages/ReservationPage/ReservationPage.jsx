@@ -9,7 +9,8 @@ const ReservationForm = (userId, restaurantId) => {
     requestType: "RESERVE",
   });
   const [message, setMessage] = useState("");
-  
+  console.log(userId,'userId');
+  console.log(restaurantId,'restaurantId');
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -20,15 +21,15 @@ const ReservationForm = (userId, restaurantId) => {
     e.preventDefault();
     try {
       const response = await fetch(
-        "http://54.193.15.200:8080/api/v1/reservations/send",
+        "http://52.53.185.188:8080/api/v1/reservations/send",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId,
-            restaurantId,
+            userId: userId.userId,
+            restaurantId: userId.restaurantId,
             numOfPeople: parseInt(formData.numOfPeople),
             slot: formData.slot,
             requestType: formData.requestType,
@@ -40,7 +41,7 @@ const ReservationForm = (userId, restaurantId) => {
         throw new Error("Failed to submit reservation request.");
       }
 
-      const data = await response.json();
+      const data = await response.text();
       setMessage(
         `Reservation ${formData.requestType === "RESERVE" ? "made" : "cancelled"} successfully!`
       );
