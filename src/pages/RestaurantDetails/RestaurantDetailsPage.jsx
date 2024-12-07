@@ -223,21 +223,27 @@ const RestaurantDetailsPage = () => {
                     ))}
                   </div>
                   <div>
-                    <button
-                      onClick={() => {
-                        setEditingReview(review);
-                        setNewReview({ stars: review.stars, text: review.text });
-                      }}
-                      className="text-blue-500 hover:underline mr-4"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteReview(review.review_id)}
-                      className="text-red-500 hover:underline"
-                    >
-                      Delete
-                    </button>
+                    {review.user_id === user.sub ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingReview(review);
+                            setNewReview({ stars: review.stars, text: review.text });
+                          }}
+                          className="text-blue-500 hover:underline mr-4"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteReview(review.review_id)}
+                          className="text-red-500 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-gray-500 text-sm"></span>
+                    )}
                   </div>
                 </div>
                 <p className="text-gray-700">{review.text}</p>
