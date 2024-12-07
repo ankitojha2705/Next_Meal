@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Star, MapPin } from "lucide-react";
-import keycloak from "../../keycloak"; // Assuming this is your Keycloak instance
+import { Star, MapPin, Clock } from "lucide-react";
+import keycloak from '../../keycloak'; // Assuming this is your Keycloak instance
+import ReservationForm from '../ReservationPage/ReservationPage'; // Import the ReservationForm component
 
 const VITE_RESTAURANT_BASE_URL = import.meta.env.VITE_RESTAURANT_BASE_URL;
 const VITE_REVIEW_BASE_URL = import.meta.env.VITE_REVIEW_BASE_URL;
@@ -19,7 +20,11 @@ const RestaurantDetailsPage = () => {
     text: "",
   });
   const [editingReview, setEditingReview] = useState(null);
+
+
+  
   const user = keycloak.tokenParsed;
+  
 
   // S3 base URL
   const S3_BASE_URL = `https://${S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/photos/`;
@@ -190,6 +195,13 @@ const RestaurantDetailsPage = () => {
             </ul>
           </div>
         </div>
+      </div>
+      {/* Reservation Section */}
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <ReservationForm
+          userId={user.sub} // Keycloak user ID
+          restaurantId={business_id}
+        />
       </div>
 
       {/* Reviews Section */}

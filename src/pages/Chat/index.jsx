@@ -1,8 +1,9 @@
 // src/pages/Chat/index.jsx
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, ThumbsUp, ThumbsDown, Search } from 'lucide-react';
+import { Send, ThumbsUp, ThumbsDown } from 'lucide-react';
 
+const API_BASE_URL = "http://3.101.119.15:5000/api/v1/assistant/query"; // Replace with your backend URL
 
 const ChatPage = () => {
   const [messages, setMessages] = useState([
@@ -24,7 +25,7 @@ const ChatPage = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
@@ -34,21 +35,38 @@ const ChatPage = () => {
       content: inputMessage,
       timestamp: new Date(),
     };
-
-    // Simulate AI response
-    const aiResponse = {
-      type: 'assistant',
-      content: "I'm searching for restaurants that match your preferences...",
-      timestamp: new Date(),
-      suggestions: [
-        "Italian restaurants nearby",
-        "Best pasta places",
-        "Romantic dinner spots"
-      ]
-    };
-
-    setMessages(prev => [...prev, newUserMessage, aiResponse]);
+    setMessages((prev) => [...prev, newUserMessage]);
     setInputMessage('');
+
+    try {
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: inputMessage }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const aiResponse = {
+          type: 'assistant',
+          content: data.response,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiResponse]);
+      } else {
+        throw new Error('Failed to fetch response from server');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      const errorResponse = {
+        type: 'assistant',
+        content: 'Something went wrong. Please try again later.',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorResponse]);
+    }
   };
 
   const MessageBubble = ({ message }) => {
@@ -65,23 +83,8 @@ const ChatPage = () => {
             }`}
           >
             <p>{message.content}</p>
-            
-            {/* Suggestions */}
-            {!isUser && message.suggestions && (
-              <div className="mt-3 space-y-2">
-                {message.suggestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    className="block w-full text-left px-3 py-2 rounded-lg bg-white hover:bg-gray-50 text-sm text-gray-700"
-                    onClick={() => setInputMessage(suggestion)}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
-          
+
           {/* Timestamp */}
           <div 
             className={`text-xs mt-1 ${
@@ -129,27 +132,6 @@ const ChatPage = () => {
             <MessageBubble key={index} message={message} />
           ))}
           <div ref={messagesEndRef} />
-        </div>
-
-        {/* Quick Suggestions */}
-        <div className="px-4 py-3 border-t bg-gray-50">
-          <p className="text-sm font-medium text-gray-700 mb-2">Quick suggestions:</p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              "Find Italian restaurants",
-              "Best brunch spots",
-              "Romantic dinner places",
-              "Vegetarian options"
-            ].map((suggestion, index) => (
-              <button
-                key={index}
-                className="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-700 hover:bg-gray-50"
-                onClick={() => setInputMessage(suggestion)}
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Input Area */}
