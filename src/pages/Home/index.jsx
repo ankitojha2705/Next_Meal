@@ -112,13 +112,13 @@ const HomePage = () => {
   if (loading) {
     return <div>Loading...</div>;
   }
-
+  
   return (
     <div>
       {/* Hero Section */}
       <div className="relative">
         <img 
-          src="/api/placeholder/1920/600?text=Food+Background"
+          src="/images/foodBanner.jpg"
           alt="Food Banner"
           className="w-full h-96 object-cover"
         />
@@ -155,8 +155,7 @@ const HomePage = () => {
 
                   {/* Filter Dropdown */}
                   {showFilter && (
-                    <div className="absolute top-full right-0 bg-white shadow-lg rounded-lg mt-2 w-64 p-4">
-                      <div className="space-y-4">
+                    <div className="absolute top-full right-0 bg-white shadow-lg rounded-lg mt-2 w-64 p-4 z-50">                      <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium">City</label>
                           <input
