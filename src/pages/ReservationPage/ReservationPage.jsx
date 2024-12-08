@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 // import keycloak from '../../keycloak'; // Assuming this is your Keycloak instance
-
+const VITE_RESERVATION_API_URL = import.meta.env.VITE_RESERVATION_API_URL;
 const ReservationForm = (userId, restaurantId) => {
     
   const [formData, setFormData] = useState({
@@ -21,7 +21,7 @@ const ReservationForm = (userId, restaurantId) => {
     e.preventDefault();
     try {
       const response = await fetch(
-        "http://52.53.185.188:8080/api/v1/reservations/send",
+        `${VITE_RESERVATION_API_URL}`,
         {
           method: "POST",
           headers: {

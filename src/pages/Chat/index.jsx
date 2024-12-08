@@ -3,8 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, ThumbsUp, ThumbsDown } from 'lucide-react';
 
-const API_BASE_URL = "http://3.101.119.15:5000/api/v1/assistant/query"; // Replace with your backend URL
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_AI_URL;
 const ChatPage = () => {
   const [messages, setMessages] = useState([
     {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import keycloak from '../../keycloak'; // Your Keycloak instance
+const VITE_RESERVATION_VIEW_API_URL = import.meta.env.VITE_RESERVATION_VIEW_API_URL;
 
 const Profile = () => {
   const user = keycloak.tokenParsed;
@@ -8,7 +9,7 @@ const Profile = () => {
   // Fetch reservations on mount if user is available
   useEffect(() => {
     if (user?.sub) {
-      fetch(`http://18.144.125.88:8081/api/v1/reservations/view/${user.sub}`)
+      fetch(`${VITE_RESERVATION_VIEW_API_URL}/${user.sub}`)
         .then(response => response.json())
         .then(data => {
           // Ensure data is an array before setting it
