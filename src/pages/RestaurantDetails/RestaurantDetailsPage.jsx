@@ -180,7 +180,7 @@ const RestaurantDetailsPage = () => {
   }
 
   const { name, description, average_rating, review_count, address, city, state, hours, image } = restaurant;
-  const imageUrl = image ? `${S3_BASE_URL}${image}.jpg` : "/api/placeholder/400/300?text=Restaurant+Image";
+  const imageUrl = image ? `${S3_BASE_URL}${image}.jpg` : "../../Images/temporary.jpg";
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -200,9 +200,7 @@ const RestaurantDetailsPage = () => {
             {[...Array(5 - Math.floor(average_rating))].map((_, i) => (
               <Star key={i} className="h-6 w-6 text-gray-300" />
             ))}
-            <span className="ml-2 text-gray-600">
-              ({review_count} reviews)
-            </span>
+            
           </div>
           <p className="text-gray-700 mb-4">{description}</p>
           <p className="text-gray-600 mb-2">

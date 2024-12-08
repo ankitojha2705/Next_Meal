@@ -12,7 +12,7 @@ const RestaurantCard = ({ restaurant }) => {
   const S3_BASE_URL = `https://${S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/photos/`;
 
   // Construct the image URL from S3
-  const imageUrl = image ? `${S3_BASE_URL}${image}.jpg` : "/api/placeholder/400/300?text=Restaurant+Image";
+  const imageUrl = image ? `${S3_BASE_URL}${image}.jpg` : "../../Images/temporary.jpg";
 
   // Calculate filled and empty stars
   const filledStars = Math.floor(average_rating);
@@ -28,9 +28,6 @@ const RestaurantCard = ({ restaurant }) => {
             className="w-full h-48 object-cover rounded-t-lg"
           />
         </Link>
-        <button className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100">
-          <Heart className="h-5 w-5 text-gray-600" />
-        </button>
       </div>
 
       <div className="p-4">
@@ -53,9 +50,7 @@ const RestaurantCard = ({ restaurant }) => {
             <span className="text-lg font-semibold text-white">
               {average_rating.toFixed(1)} / 5
             </span>
-            <span className="ml-2 text-sm text-gray-300">
-              ({review_count} reviews)
-            </span>
+            
           </div>
         </div>
 
