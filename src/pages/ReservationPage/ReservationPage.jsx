@@ -9,8 +9,7 @@ const ReservationForm = (userId, restaurantId) => {
     requestType: "RESERVE",
   });
   const [message, setMessage] = useState("");
-  console.log(userId,'userId');
-  console.log(restaurantId,'restaurantId');
+  
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
