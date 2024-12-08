@@ -20,7 +20,7 @@ const Layout = () => {
   const handleSignout = () => {
     keycloak.logout();
     localStorage.removeItem('token'); // Remove token from local storage
-    navigate('/login'); // Redirect to login page
+    // navigate('/login'); // Redirect to login page
   };
 
   return (

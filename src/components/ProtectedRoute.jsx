@@ -5,7 +5,7 @@ import keycloak from '../keycloak'; // Import your Keycloak instance
 const ProtectedRoute = ({ children }) => {
   if (!keycloak.authenticated) {
     // Redirect to Keycloak login if not authenticated
-    return <Navigate to="/login" />;
+    return <Navigate to="/"/>;
   }
 
   return children;

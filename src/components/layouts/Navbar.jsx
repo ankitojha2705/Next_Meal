@@ -17,9 +17,9 @@ const Navbar = () => {
             <Link to="/search" className="text-gray-600 hover:text-gray-900">
               Search
             </Link>
-            <Link to="/login" className="text-gray-600 hover:text-gray-900">
+            {/* <Link to="/login" className="text-gray-600 hover:text-gray-900">
               Login
-            </Link>
+            </Link> */}
             <Link 
               to="/signup"
               className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
