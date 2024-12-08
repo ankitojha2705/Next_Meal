@@ -80,15 +80,7 @@ To enable authentication:
 1. **Build the project**:
    ```bash
    npm run build
-
-
-## 📧 Contact
-
-For any queries, please contact:
-
-- **Name**: Ankit Ojha  
-- **Email**: [team.nexabytes@gmail.com](mailto:team.nexabytes@gmail.com)  
-
+   ```
 
 ---
 
