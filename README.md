@@ -1,4 +1,4 @@
-# Next Meal Frontend
+# NextMeal Frontend
 
 This repository contains the frontend code for the **Next Meal** application, which connects users to restaurants, allows reservations, and provides user authentication via **Keycloak**.
 
